@@ -1,0 +1,81 @@
+﻿@page
+@model practica2.Pages.nominaModel
+@{      
+    decimal DescuentoAFP(decimal salario){
+        const decimal descuentoMaximoAFP= 7738.67m;
+        decimal descuentoAFP = salario * (2.87m / 100);
+        return descuentoAFP > descuentoMaximoAFP?descuentoMaximoAFP:descuentoAFP;
+    }
+    decimal DescuentoSFS(decimal salario)
+    {
+        const decimal descuentoMaximoSFS = 4098.53m;
+        decimal descuentoSFS = salario * (3.04m / 100);
+        return descuentoSFS > descuentoMaximoSFS ? descuentoMaximoSFS : descuentoSFS;
+    }
+    decimal DescuentoISR(decimal salario) {
+        decimal sueldoAnual = salario * 12;
+        decimal retencion = 0;
+        const decimal maximoexcento = 41220.00m;
+        const decimal maximoTasa15Porciento= 624329.00m;
+        const decimal maximoTasa20Porciento= 867123.00m;
+        const decimal retencionTasa20Porciento = 31216.00m;
+        const decimal retencionTasa25Porciento= 79776.00m;
+
+        if (sueldoAnual<=maximoexcento){
+            retencion = 0;
+        }
+        else if (sueldoAnual<=maximoTasa15Porciento){
+            retencion=(sueldoAnual - maximoexcento) * (15 / 100);
+        }
+        else if (sueldoAnual<=maximoTasa20Porciento){
+            retencion =(sueldoAnual - maximoTasa15Porciento) * (20 / 100) + retencionTasa20Porciento;
+        }
+        else{
+            retencion = (sueldoAnual - maximoTasa20Porciento) * (25 / 100) + retencionTasa25Porciento;
+        }
+        return retencion/12;
+    }
+    decimal totalDescuentos(decimal salario) {
+        decimal descuentoAFP= DescuentoAFP(salario);
+        decimal descuentoISR = DescuentoISR(salario);
+        decimal descuentoSFS = DescuentoSFS(salario);
+        return descuentoAFP + descuentoISR + descuentoSFS;
+
+    }
+    decimal sueldoNeto(decimal salario) {
+        return salario - totalDescuentos(salario);
+    }
+}
+
+<h1> Descuentos Nomina</h1>
+<table class="table">
+    <thead>
+        <tr class="row">
+            <th class="col">Nombre</th>
+            <th class="col">Apellido</th>
+            <th class="col">Cargo</th>
+            <th class="col">Salario Mensual</th>
+            <th class="col">Descuento AFP</th>
+            <th class="col">Descuento ARS</th>
+            <th class="col">Descuento ISR</th>
+            <th class="col">Total Descuentos</th>
+            <th class="col">Sueldo Neto</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.empleados)
+        { 
+        <tr class="row">
+            <td class="col">@item.nombre</td>
+            <td class="col">@item.apellido</td>
+            <td class="col">@item.cargo</td>
+            <td class="col">@item.salario</td>
+            <td class="col">@DescuentoAFP(item.salario).ToString("N2")</td>
+            <td class="col">@DescuentoSFS(item.salario).ToString("N2")</td>
+            <td class="col">@DescuentoISR(item.salario).ToString("N2")</td>
+            <td class="col">@totalDescuentos(item.salario).ToString("N2")</td>
+            <td class="col">@sueldoNeto(item.salario).ToString("N2")</td>
+        </tr>
+        }
+     </tbody>
+</table>
